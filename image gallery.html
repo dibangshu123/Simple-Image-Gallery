@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Image Gallery</title>
+  <style>
+    :root{--gap:12px}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;line-height:1.4;margin:24px;background:#f7f7f7;color:#222}
+    h1{margin-bottom:12px}
+
+    /* gallery grid */
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:var(--gap);max-width:1000px}
+    .thumb{cursor:pointer;overflow:hidden;border-radius:8px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+    .thumb:hover img{transform:scale(1.06)}
+
+    /* large preview area */
+    .preview{margin-top:20px;max-width:1000px}
+    .preview img{width:100%;height:auto;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+    .caption{margin-top:8px;font-size:0.95rem;color:#555}
+
+    /* small responsive tweaks */
+    @media (max-width:520px){.gallery{grid-template-columns:repeat(3,1fr)}}
+  </style>
+</head>
+<body>
+  <h1>Simple HTML Image Gallery</h1>
+  <p>Click a thumbnail to view the larger image.</p>
+
+  <!-- Thumbnails -->
+  <div class="gallery" id="gallery">
+    <div class="thumb" data-large="https://via.placeholder.com/1000x600?text=Image+1" data-caption="Sunset over hills">
+      <img src="https://via.placeholder.com/300x180?text=Image+1" alt="Image 1 thumbnail">
+    </div>
+    <div class="thumb" data-large="https://via.placeholder.com/1000x600?text=Image+2" data-caption="Calm lake">
+      <img src="https://via.placeholder.com/300x180?text=Image+2" alt="Image 2 thumbnail">
+    </div>
+    <div class="thumb" data-large="https://via.placeholder.com/1000x600?text=Image+3" data-caption="Mountain path">
+      <img src="https://via.placeholder.com/300x180?text=Image+3" alt="Image 3 thumbnail">
+    </div>
+    <div class="thumb" data-large="https://via.placeholder.com/1000x600?text=Image+4" data-caption="Forest canopy">
+      <img src="https://via.placeholder.com/300x180?text=Image+4" alt="Image 4 thumbnail">
+    </div>
+    <div class="thumb" data-large="https://via.placeholder.com/1000x600?text=Image+5" data-caption="City skyline">
+      <img src="https://via.placeholder.com/300x180?text=Image+5" alt="Image 5 thumbnail">
+    </div>
+    <div class="thumb" data-large="https://via.placeholder.com/1000x600?text=Image+6" data-caption="Starry night">
+      <img src="https://via.placeholder.com/300x180?text=Image+6" alt="Image 6 thumbnail">
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview" id="preview" aria-live="polite">
+    <img id="largeImg" src="https://via.placeholder.com/1000x600?text=Image+1" alt="Large preview">
+    <div class="caption" id="caption">Sunset over hills</div>
+  </div>
+
+  <script>
+    // Basic gallery behavior: clicking a thumbnail updates the large preview
+    (function(){
+      const gallery = document.getElementById('gallery');
+      const largeImg = document.getElementById('largeImg');
+      const caption = document.getElementById('caption');
+      const thumbs = Array.from(gallery.querySelectorAll('.thumb'));
+
+      function showThumbnail(el){
+        const large = el.dataset.large;
+        const cap = el.dataset.caption || '';
+        // small fade effect
+        largeImg.style.opacity = 0;
+        setTimeout(()=>{
+          largeImg.src = large;
+          largeImg.alt = cap || 'Preview image';
+          caption.textContent = cap;
+          largeImg.style.opacity = 1;
+        }, 150);
+
+        // accessibility: mark selected thumbnail (optional)
+        thumbs.forEach(t => t.setAttribute('aria-pressed', 'false'));
+        el.setAttribute('aria-pressed', 'true');
+      }
+
+      // click handler (event delegation)
+      gallery.addEventListener('click', (e)=>{
+        const thumb = e.target.closest('.thumb');
+        if(!thumb) return;
+        showThumbnail(thumb);
+      });
+
+      // keyboard navigation: left/right to move between thumbnails
+      let currentIndex = 0;
+      function updateCurrentIndex(index){
+        currentIndex = Math.max(0, Math.min(index, thumbs.length-1));
+        showThumbnail(thumbs[currentIndex]);
+        thumbs[currentIndex].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      }
+
+      document.addEventListener('keydown', (e)=>{
+        if(e.key === 'ArrowRight') { updateCurrentIndex(currentIndex+1); }
+        if(e.key === 'ArrowLeft') { updateCurrentIndex(currentIndex-1); }
+      });
+
+      // initialize first thumbnail as selected
+      showThumbnail(thumbs[0]);
+    })();
+  </script>
+</body>
+</html>
